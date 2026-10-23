@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Todo List App 📝</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>📝 Todo List App</h1>
+      <p class="subtitle">Kelola tugas Anda dengan mudah</p>
+    </header>
+
+    <% if (error) { %>
+      <div class="alert alert-error"><%= error %></div>
+    <% } %>
+
+    <!-- Form Tambah Todo -->
+    <div class="card form-card">
+      <h2>➕ Tambah Todo Baru</h2>
+      <form action="/todos" method="POST">
+        <div class="form-group">
+          <label for="title">Judul <span class="required">*</span></label>
+          <input type="text" id="title" name="title" placeholder="Masukkan judul todo..." required>
+        </div>
+        <div class="form-group">
+          <label for="description">Deskripsi</label>
+          <textarea id="description" name="description" placeholder="Tambahkan deskripsi (opsional)..." rows="3"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Tambah Todo</button>
+      </form>
+    </div>
+
+    <!-- Statistik -->
+    <div class="stats">
+      <div class="stat-item">
+        <span class="stat-number"><%= todos.length %></span>
+        <span class="stat-label">Total</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number"><%= todos.filter(t => !t.completed).length %></span>
+        <span class="stat-label">Aktif</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number"><%= todos.filter(t => t.completed).length %></span>
+        <span class="stat-label">Selesai</span>
+      </div>
+    </div>
+
+    <!-- Daftar Todo -->
+    <div class="todo-list">
+      <% if (todos.length === 0) { %>
+        <div class="empty-state">
+          <span class="empty-icon">🎉</span>
+          <p>Tidak ada todo. Tambahkan todo pertama Anda!</p>
+        </div>
+      <% } else { %>
+        <% todos.forEach(todo => { %>
+          <div class="todo-item <%= todo.completed ? 'completed' : '' %>">
+            <div class="todo-content">
+              <h3 class="todo-title"><%= todo.title %></h3>
+              <% if (todo.description) { %>
+                <p class="todo-desc"><%= todo.description %></p>
+              <% } %>
+              <span class="todo-date">
+                📅 <%= new Date(todo.created_at).toLocaleDateString('id-ID', { 
+                  day: 'numeric', month: 'long', year: 'numeric',
+                  hour: '2-digit', minute: '2-digit'
+                }) %>
+              </span>
+            </div>
+            <div class="todo-actions">
+              <form action="/todos/<%= todo.id %>/toggle" method="POST" style="display:inline;">
+                <button type="submit" class="btn <%= todo.completed ? 'btn-warning' : 'btn-success' %>">
+                  <%= todo.completed ? '↩ Batalkan' : '✓ Selesai' %>
+                </button>
+              </form>
+              <form action="/todos/<%= todo.id %>/delete" method="POST" style="display:inline;"
+                    onsubmit="return confirm('Yakin ingin menghapus todo ini?')">
+                <button type="submit" class="btn btn-danger">🗑 Hapus</button>
+              </form>
+            </div>
+          </div>
+        <% }) %>
+      <% } %>
+    </div>
+
+    <footer>
+      <p>Todo App &copy; 2026 — Tugas Praktikum Komputasi Awan</p>
+    </footer>
+  </div>
+</body>
+</html>

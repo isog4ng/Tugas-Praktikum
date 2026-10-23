@@ -1,0 +1,14 @@
+# Ignore environment variables (WAJIB — berisi password rahasia)
+.env
+
+# Node modules
+node_modules/
+app/node_modules/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db

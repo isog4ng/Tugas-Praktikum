@@ -1,0 +1,64 @@
+services:
+  # ===========================
+  # Database Service (MySQL)
+  # ===========================
+  db:
+    image: mysql:8.0
+    container_name: todo_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - internal_network
+    # Healthcheck — pastikan MySQL siap sebelum app dimulai
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    # Port database TIDAK dibuka ke publik (hanya internal)
+
+  # ===========================
+  # Application Service (Node.js)
+  # ===========================
+  app:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+      target: production
+    container_name: todo_app
+    restart: unless-stopped
+    ports:
+      - "80:3000"
+    environment:
+      PORT: 3000
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+    networks:
+      - internal_network
+    depends_on:
+      db:
+        condition: service_healthy
+
+# ===========================
+# Networks — internal only
+# ===========================
+networks:
+  internal_network:
+    driver: bridge
+
+# ===========================
+# Volumes — persistent storage
+# ===========================
+volumes:
+  db_data:
+    driver: local
